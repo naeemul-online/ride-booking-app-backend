@@ -38,7 +38,7 @@ passport.use(
             email,
             name: profile.displayName,
             picture: profile.photos?.[0].value,
-            role: Role.RIDER,
+            role: Role.rider,
             isVerified: true,
             auths: [
               {
@@ -66,7 +66,6 @@ passport.use(
       passwordField: "password",
     },
     async (email: string, password: string, done) => {
-
       try {
         const isUserExists = await User.findOne({ email });
 

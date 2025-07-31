@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
-import { verifyToken } from "../utils/jwt";
+import { IStatus } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
-import httpStatus from "http-status-codes";
-import { IsActive } from "../modules/user/user.interface";
+import { verifyToken } from "../utils/jwt";
 
 export const checkAuth =
   (...authRoles: string[]) =>
@@ -28,17 +28,16 @@ export const checkAuth =
         throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
       }
       if (
-        isUserExist.isActive === IsActive.BLOCKED ||
-        isUserExist.isActive === IsActive.INACTIVE
+        isUserExist.status === IStatus.blocked 
       ) {
         throw new AppError(
           httpStatus.BAD_REQUEST,
-          `User is ${isUserExist.isActive}`
+          `User is ${isUserExist.status}`
         );
       }
-      if (isUserExist.isDeleted) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
-      }
+      // if (isUserExist.isDeleted) {
+      //   throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+      // }
 
       if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(403, "You are not permitted to view this route!!!");

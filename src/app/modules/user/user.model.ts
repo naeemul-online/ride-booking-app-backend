@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IAuthProvider, IsActive, IUser, Role } from "./user.interface";
+import { IAuthProvider, IStatus, IUser, Role } from "./user.interface";
 
 const authProviderSchema = new Schema<IAuthProvider>(
   {
@@ -25,47 +25,16 @@ const userSchema = new Schema<IUser>(
     phone: {
       type: String,
     },
-    address: {
-      type: String,
-    },
-    picture: {
-      type: String,
-    },
+
     role: {
       type: String,
       enum: Object.values(Role),
-      default: Role.RIDER,
+      default: Role.rider,
     },
-    isActive: {
+    status: {
       type: String,
-      enum: Object.values(IsActive),
-      default: IsActive.ACTIVE,
-    },
-
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
-
-    // Driver-specific fields
-    isApproved: {
-      type: Boolean,
-      default: false,
-    },
-    isAvailable: {
-      type: Boolean,
-      default: false,
-    },
-    vehicleInfo: {
-      type: String,
-    },
-    totalEarnings: {
-      type: Number,
-      default: 0,
+      enum: Object.values(IStatus),
+      default: IStatus.active,
     },
     auths: [authProviderSchema],
   },

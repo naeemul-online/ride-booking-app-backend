@@ -3,7 +3,7 @@ import { envVars } from "../config/env";
 import { IAuthProvider, IUser, Role } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
 
-export const seedSuperAdmin = async () => {
+export const seedSuperadmin = async () => {
   try {
     // todo:
     /* 
@@ -11,29 +11,29 @@ export const seedSuperAdmin = async () => {
     2. If super admin dose not exit create a super admin
     */
 
-    const isSuperAdmin = await User.findOne({
-      email: envVars.SUPER_ADMIN_EMAIL,
+    const isSuperadmin = await User.findOne({
+      email: envVars.super_admin_EMAIL,
     });
-    if (isSuperAdmin) {
-      console.log("Super Admin Already Exists!");
+    if (isSuperadmin) {
+      console.log("Super admin Already Exists!");
       return;
     }
 
     console.log("trying to create super admin");
     const hashPassword = await bcryptjs.hash(
-      envVars.SUPER_ADMIN_PASSWORD,
+      envVars.super_admin_PASSWORD,
       Number(envVars.BCRYPT_SALT_ROUND)
     );
 
     const authProvider: IAuthProvider = {
       provider: "credentials",
-      providerId: envVars.SUPER_ADMIN_EMAIL,
+      providerId: envVars.super_admin_EMAIL,
     };
 
     const payload: IUser = {
-      name: "Super Admin",
-      role: Role.SUPER_ADMIN,
-      email: envVars.SUPER_ADMIN_EMAIL,
+      name: "Super admin",
+      role: Role.super_admin,
+      email: envVars.super_admin_EMAIL,
       password: hashPassword,
       isVerified: true,
       auths: [authProvider],

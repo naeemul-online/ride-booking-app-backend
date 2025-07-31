@@ -71,17 +71,17 @@ const updateUser = async (
   }
 
   if (payload.role) {
-    if (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER) {
+    if (decodedToken.role === Role.rider || decodedToken.role === Role.driver) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
 
-    if (payload.role === Role.SUPER_ADMIN && decodedToken.role === Role.ADMIN) {
+    if (payload.role === Role.super_admin && decodedToken.role === Role.admin) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
   }
 
-  if (payload.isActive || payload.isDeleted || payload.isVerified) {
-    if (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER) {
+  if (payload.status) {
+    if (decodedToken.role === Role.rider || decodedToken.role === Role.driver) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
   }
