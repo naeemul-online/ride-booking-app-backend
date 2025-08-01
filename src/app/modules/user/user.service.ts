@@ -5,8 +5,10 @@ import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { userSearchableFields } from "./user.constant";
-import { IAuthProvider, IUser, Role } from "./user.interface";
+import { IAuthProvider, IStatus, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
+import { Driver } from "../dirver/driver.model";
+import { Ride } from "../ride/ride.model";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -55,7 +57,7 @@ const getAllUsers = async (query: Record<string, string>) => {
 };
 
 const getSingleUser = async (id: string) => {
-  const user = await User.findById(id);
+  const user = await User.findById(id).select("-password");
   return user;
 };
 
@@ -101,9 +103,66 @@ const updateUser = async (
   return newUpdatedUser;
 };
 
-export const UserServices = {
+const blockUnblockUser = async (userId: string, status: IStatus) => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { status },
+    { new: true }
+  ).select("-password");
+  return user;
+};
+
+const getAllDrivers = async () => {
+  const drivers = await Driver.find({})
+    .populate("userId", "name email phone status")
+    .sort({ createdAt: -1 });
+  return drivers;
+};
+
+const approveDriver = async (
+  driverId: string,
+  approvalStatus: "approved" | "suspended"
+) => {
+  const driver = await Driver.findByIdAndUpdate(
+    driverId,
+    { approvalStatus },
+    { new: true }
+  ).populate("userId", "name email phone");
+  return driver;
+};
+
+const getAllRides = async () => {
+  const rides = await Ride.find({})
+    .populate("riderId driverId", "name phone")
+    .sort({ createdAt: -1 });
+  return rides;
+};
+const getSystemStats = async () => {
+  const totalUsers = await User.countDocuments();
+  const totalDrivers = await Driver.countDocuments();
+  const totalRides = await Ride.countDocuments();
+  const completedRides = await Ride.countDocuments({ status: 'completed' });
+  const activeRides = await Ride.countDocuments({ 
+    status: { $in: ['requested', 'accepted', 'picked_up', 'in_transit'] }
+  });
+  
+  return {
+    totalUsers,
+    totalDrivers,
+    totalRides,
+    completedRides,
+    activeRides,
+  };
+};
+
+export const UserService = {
   createUser,
   getAllUsers,
   updateUser,
   getSingleUser,
+  blockUnblockUser,
+  getAllDrivers,
+  approveDriver,
+  getAllRides,
+  getSystemStats
 };

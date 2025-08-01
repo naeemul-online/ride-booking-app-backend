@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
+import { JwtPayload } from "jsonwebtoken";
+import { envVars } from "../../config/env";
 import { catchAsync } from "../../utils/catchAsync";
+import { verifyToken } from "../../utils/jwt";
 import { sendResponse } from "../../utils/sendResponse";
 import { RideService } from "./ride.service";
-import { verifyToken } from "../../utils/jwt";
-import { envVars } from "../../config/env";
-import { JwtPayload } from "jsonwebtoken";
-import { any } from "zod";
-import { IUser } from "../user/user.interface";
 
 const requestRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -102,17 +100,23 @@ const getRideHistory = catchAsync(
   }
 );
 
-const cancelRide = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const { rideId } = req.params;
-  const { reason } = req.body;
-  const result = await RideService.cancelRide(rideId, req.user.userId, reason);
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Ride cancelled successfully',
-    data: result,
-  });
-});
+const cancelRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { rideId } = req.params;
+    const { reason } = req.body;
+    const result = await RideService.cancelRide(
+      rideId,
+      req.user.userId,
+      reason
+    );
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Ride cancelled successfully",
+      data: result,
+    });
+  }
+);
 
 export const RideController = {
   requestRide,
@@ -120,5 +124,5 @@ export const RideController = {
   acceptRide,
   updateRideStatus,
   getRideHistory,
-  cancelRide
+  cancelRide,
 };

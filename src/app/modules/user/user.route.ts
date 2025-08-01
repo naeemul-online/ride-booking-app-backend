@@ -21,8 +21,26 @@ router.get(
 );
 
 router.get(
-  "/:id",
+  "/drivers",
   checkAuth(Role.admin, Role.super_admin),
+  UserControllers.getAllDrivers
+);
+
+router.get(
+  "/rides",
+  checkAuth(Role.admin, Role.super_admin),
+  UserControllers.getAllRides
+);
+
+router.get(
+  "/stats",
+  checkAuth(Role.admin, Role.super_admin),
+  UserControllers.getSystemStats
+);
+
+router.get(
+  "/profile",
+  checkAuth(...Object.values(Role)),
   UserControllers.getSingleUser
 );
 
@@ -33,7 +51,16 @@ router.patch(
   UserControllers.updateUser
 );
 
+router.patch(
+  "/:userId/status",
+  checkAuth(Role.super_admin, Role.super_admin),
+  UserControllers.blockUnblockUser
+);
 
-
+router.patch(
+  "/:driverId/approve",
+  checkAuth(Role.super_admin, Role.super_admin),
+  UserControllers.approveDriver
+);
 
 export const UserRoutes = router;
