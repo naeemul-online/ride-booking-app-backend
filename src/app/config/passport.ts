@@ -73,7 +73,7 @@ passport.use(
           return done("User dose not exist");
         }
 
-        const isGoogleAuthenticate = isUserExists.auths.some(
+        const isGoogleAuthenticate = isUserExists.auths?.some(
           (providerObject) => providerObject.provider == "google"
         );
 
@@ -100,11 +100,7 @@ passport.use(
   )
 );
 
-// frontend localhost:5173/login?redirect=/booking -> localhost:5000/api/v1/auth/google?redirect=/booking -> passport -> Google OAuth Consent -> gmail login -> successful -> callback url localhost:5000/api/v1/auth/google/callback -> db store -> token
 
-// Bridge == Google -> user db store -> token
-//Custom -> email , password, role : USER, name... -> registration -> DB -> 1 User create
-//Google -> req -> google -> successful : Jwt Token : Role , email -> DB - Store -> token - api access
 
 passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
   done(null, user._id);

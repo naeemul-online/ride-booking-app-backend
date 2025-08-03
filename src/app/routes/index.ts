@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AuthRoutes } from "../modules/auth/auth.route";
-import { DriverRoutes } from "../modules/dirver/driver.route";
+import { DriverRoutes } from "../modules/driver/driver.route";
 import { RideRouts } from "../modules/ride/ride.route";
 import { UserRoutes } from "../modules/user/user.route";
 

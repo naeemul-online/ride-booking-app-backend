@@ -25,7 +25,6 @@ const userSchema = new Schema<IUser>(
     phone: {
       type: String,
     },
-
     role: {
       type: String,
       enum: Object.values(Role),

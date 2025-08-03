@@ -1,8 +1,8 @@
 import httpStatus from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
+import { Ride } from "../ride/ride.model";
 import { IDriver } from "./diver.interface";
 import { Driver } from "./driver.model";
-import { Ride } from "../ride/ride.model";
 
 const registerDriver = async (userId: string, driverData: Partial<IDriver>) => {
   const existingDriver = await Driver.findOne({ userId });

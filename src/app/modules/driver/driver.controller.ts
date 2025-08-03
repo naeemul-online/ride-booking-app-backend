@@ -11,7 +11,13 @@ import { DriverService } from "./driver.service";
 const registerDriver = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = await DriverService.registerDriver(req.user.userId, req.body);
+    const token = req.headers.authorization as string;
+    const { userId } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
+
+    const user = await DriverService.registerDriver(userId, req.body);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
@@ -21,17 +27,14 @@ const registerDriver = catchAsync(
   }
 );
 
-const updateStatus = catchAsync(
+const updateDriverStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { isOnline } = req.body;
     const token = req.headers.authorization as string;
-
-    const decodedToken = verifyToken(
+    const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
     ) as JwtPayload;
-    const userId = decodedToken.userId;
-
-    const { isOnline } = req.body;
 
     const result = await DriverService.updateDriverStatus(userId, isOnline);
     sendResponse(res, {
@@ -43,26 +46,31 @@ const updateStatus = catchAsync(
   }
 );
 
-const getDriverRides = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const result = await DriverService.getDriverRides(req.user._id);
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Driver rides retrieved',
-    data: result,
-  });
-});
-
-const getEarnings = catchAsync(
+const getDriverRides = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization as string;
-
-    const decodedToken = verifyToken(
+    const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
     ) as JwtPayload;
 
-    const userId = decodedToken.userId;
+    const result = await DriverService.getDriverRides(userId);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Driver rides retrieved",
+      data: result,
+    });
+  }
+);
+
+const getEarnings = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization as string;
+    const { userId } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
 
     const result = await DriverService.getDriverEarnings(userId);
     sendResponse(res, {
@@ -74,20 +82,30 @@ const getEarnings = catchAsync(
   }
 );
 
-const updateLocation = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const result = await DriverService.updateLocation(req.user._id, req.body.location);
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Location updated',
-    data: result,
-  });
-});
+const updateLocation = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization as string;
+    const { userId } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
+    const result = await DriverService.updateLocation(
+      userId,
+      req.body.location
+    );
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Location updated",
+      data: result,
+    });
+  }
+);
 
 export const DriverController = {
   registerDriver,
-  updateStatus,
+  updateDriverStatus,
   getEarnings,
   updateLocation,
-  getDriverRides
+  getDriverRides,
 };

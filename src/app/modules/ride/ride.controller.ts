@@ -10,13 +10,10 @@ import { RideService } from "./ride.service";
 const requestRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization as string;
-
-    const decodedToken = verifyToken(
+    const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
     ) as JwtPayload;
-
-    const userId = decodedToken.userId;
 
     const result = await RideService.requestRide(userId, req.body);
     sendResponse(res, {
@@ -45,12 +42,10 @@ const acceptRide = catchAsync(
     const { rideId } = req.params;
 
     const token = req.headers.authorization as string;
-    const decodedToken = verifyToken(
+    const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
     ) as JwtPayload;
-
-    const userId = decodedToken.userId;
 
     const result = await RideService.acceptRide(rideId, userId);
     sendResponse(res, {
@@ -87,10 +82,13 @@ const updateRideStatus = catchAsync(
 
 const getRideHistory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await RideService.getRideHistory(
-      req.user.userId,
-      req.user.role
-    );
+    const token = req.headers.authorization as string;
+    const { userId, role } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
+
+    const result = await RideService.getRideHistory(userId, role);
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -104,11 +102,14 @@ const cancelRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { rideId } = req.params;
     const { reason } = req.body;
-    const result = await RideService.cancelRide(
-      rideId,
-      req.user.userId,
-      reason
-    );
+    
+    const token = req.headers.authorization as string;
+    const { userId } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
+
+    const result = await RideService.cancelRide(rideId, userId, reason);
     sendResponse(res, {
       statusCode: 200,
       success: true,

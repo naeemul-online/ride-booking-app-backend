@@ -53,13 +53,13 @@ router.patch(
 
 router.patch(
   "/:userId/status",
-  checkAuth(Role.super_admin, Role.super_admin),
+  checkAuth(Role.super_admin, Role.admin),
   UserControllers.blockUnblockUser
 );
 
 router.patch(
   "/:driverId/approve",
-  checkAuth(Role.super_admin, Role.super_admin),
+  checkAuth(Role.super_admin, Role.admin),
   UserControllers.approveDriver
 );
 

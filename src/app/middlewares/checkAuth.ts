@@ -27,9 +27,7 @@ export const checkAuth =
       if (!isUserExist) {
         throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
       }
-      if (
-        isUserExist.status === IStatus.blocked 
-      ) {
+      if (isUserExist.status === IStatus.blocked) {
         throw new AppError(
           httpStatus.BAD_REQUEST,
           `User is ${isUserExist.status}`
@@ -42,7 +40,7 @@ export const checkAuth =
       if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(403, "You are not permitted to view this route!!!");
       }
-      req.user = verifiedToken as JwtPayload;
+      req.user = verifiedToken;
       next();
     } catch (error) {
       console.log("jwt error", error);

@@ -37,9 +37,5 @@ router.patch(
   RideController.cancelRide
 );
 
-// router.patch("/:id/accept");
-// router.patch("/:id/status");
-// router.get("/history");
-// router.patch("/:id/cancel");
 
 export const RideRouts = router;

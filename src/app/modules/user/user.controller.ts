@@ -5,6 +5,8 @@ import { JwtPayload } from "jsonwebtoken";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { UserService } from "./user.service";
+import { envVars } from "../../config/env";
+import { verifyToken } from "../../utils/jwt";
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -64,7 +66,13 @@ const approveDriver = catchAsync(
 
 const getSingleUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await UserService.getSingleUser(req.user.userId);
+    const token = req.headers.authorization as string;
+    const { userId } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
+
+    const result = await UserService.getSingleUser(userId);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -77,13 +85,10 @@ const getSingleUser = catchAsync(
 const updateUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.id;
-    const verifiedToken = req.user;
     const payload = req.body;
-    const user = await UserService.updateUser(
-      userId,
-      payload,
-      verifiedToken as JwtPayload
-    );
+    const requester = req.user as JwtPayload;
+
+    const user = await UserService.updateUser(userId, payload, requester);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,

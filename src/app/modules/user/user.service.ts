@@ -4,14 +4,21 @@ import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
-import { userSearchableFields } from "./user.constant";
-import { IAuthProvider, IStatus, IUser, Role } from "./user.interface";
-import { User } from "./user.model";
-import { Driver } from "../dirver/driver.model";
+import { Driver } from "../driver/driver.model";
 import { Ride } from "../ride/ride.model";
+import { userSearchableFields } from "./user.constant";
+import { IAuthProvider, IStatus, IUser } from "./user.interface";
+import { User } from "./user.model";
 
 const createUser = async (payload: Partial<IUser>) => {
-  const { email, password, ...rest } = payload;
+  const { email, role, password, ...rest } = payload;
+
+  if (role === "admin" || role === "super_admin") {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `You are not authorized for creating ${role} account`
+    );
+  }
 
   const isUserExist = await User.findOne({ email });
 
@@ -32,10 +39,10 @@ const createUser = async (payload: Partial<IUser>) => {
   const user = await User.create({
     email,
     password: hashedPassword,
+    role,
     auths: [authProvider],
     ...rest,
   });
-
   return user;
 };
 
@@ -47,7 +54,6 @@ const getAllUsers = async (query: Record<string, string>) => {
     .sort()
     .fields()
     .paginate();
-
   const [data, meta] = await Promise.all([
     users.build(),
     queryBuilder.getMeta(),
@@ -64,28 +70,18 @@ const getSingleUser = async (id: string) => {
 const updateUser = async (
   userId: string,
   payload: Partial<IUser>,
-  decodedToken: JwtPayload
+  requester: JwtPayload
 ) => {
+  if (payload.role === "admin" && requester.role !== "super_admin") {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Only super_admin can assign admin role"
+    );
+  }
   const ifUserExist = await User.findById(userId);
 
   if (!ifUserExist) {
     throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
-  }
-
-  if (payload.role) {
-    if (decodedToken.role === Role.rider || decodedToken.role === Role.driver) {
-      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
-    }
-
-    if (payload.role === Role.super_admin && decodedToken.role === Role.admin) {
-      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
-    }
-  }
-
-  if (payload.status) {
-    if (decodedToken.role === Role.rider || decodedToken.role === Role.driver) {
-      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
-    }
   }
 
   if (payload.password) {
@@ -116,7 +112,8 @@ const getAllDrivers = async () => {
   const drivers = await Driver.find({})
     .populate("userId", "name email phone status")
     .sort({ createdAt: -1 });
-  return drivers;
+  const totalDrivers = await Driver.countDocuments();
+  return { totalDrivers, drivers };
 };
 
 const approveDriver = async (
@@ -135,17 +132,19 @@ const getAllRides = async () => {
   const rides = await Ride.find({})
     .populate("riderId driverId", "name phone")
     .sort({ createdAt: -1 });
-  return rides;
+  const totalRides = await Ride.countDocuments();
+
+  return { totalRides, rides };
 };
 const getSystemStats = async () => {
   const totalUsers = await User.countDocuments();
   const totalDrivers = await Driver.countDocuments();
   const totalRides = await Ride.countDocuments();
-  const completedRides = await Ride.countDocuments({ status: 'completed' });
-  const activeRides = await Ride.countDocuments({ 
-    status: { $in: ['requested', 'accepted', 'picked_up', 'in_transit'] }
+  const completedRides = await Ride.countDocuments({ status: "completed" });
+  const activeRides = await Ride.countDocuments({
+    status: { $in: ["requested", "accepted", "picked_up", "in_transit"] },
   });
-  
+
   return {
     totalUsers,
     totalDrivers,
@@ -164,5 +163,5 @@ export const UserService = {
   getAllDrivers,
   approveDriver,
   getAllRides,
-  getSystemStats
+  getSystemStats,
 };

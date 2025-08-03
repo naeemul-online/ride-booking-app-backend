@@ -1,4 +1,4 @@
-import { Driver } from "../dirver/driver.model";
+import { Driver } from "../driver/driver.model";
 import { Ride } from "./ride.model";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
