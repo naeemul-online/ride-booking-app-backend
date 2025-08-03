@@ -4,11 +4,13 @@ import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { UserServices } from "./user.service";
+import { UserService } from "./user.service";
+import { envVars } from "../../config/env";
+import { verifyToken } from "../../utils/jwt";
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = await UserServices.createUser(req.body);
+    const user = await UserService.createUser(req.body);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
@@ -20,8 +22,10 @@ const createUser = catchAsync(
 
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const query = req.query
-    const result = await UserServices.getAllUsers(query as Record<string, string>);
+    const query = req.query;
+    const result = await UserService.getAllUsers(
+      query as Record<string, string>
+    );
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -32,10 +36,43 @@ const getAllUsers = catchAsync(
   }
 );
 
+const blockUnblockUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    const { status } = req.body;
+    const result = await UserService.blockUnblockUser(userId, status);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `User ${status} successfully`,
+      data: result,
+    });
+  }
+);
+
+const approveDriver = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { driverId } = req.params;
+    const { approvalStatus } = req.body;
+    const result = await UserService.approveDriver(driverId, approvalStatus);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Driver ${approvalStatus} successfully`,
+      data: result,
+    });
+  }
+);
+
 const getSingleUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
-    const result = await UserServices.getSingleUser(id);
+    const token = req.headers.authorization as string;
+    const { userId } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
+
+    const result = await UserService.getSingleUser(userId);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -48,13 +85,10 @@ const getSingleUser = catchAsync(
 const updateUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.id;
-    const verifiedToken = req.user;
     const payload = req.body;
-    const user = await UserServices.updateUser(
-      userId,
-      payload,
-      verifiedToken as JwtPayload
-    );
+    const requester = req.user as JwtPayload;
+
+    const user = await UserService.updateUser(userId, payload, requester);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
@@ -64,9 +98,50 @@ const updateUser = catchAsync(
   }
 );
 
+const getAllDrivers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await UserService.getAllDrivers();
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Drivers retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+const getAllRides = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await UserService.getAllRides();
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Rides retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+const getSystemStats = catchAsync(
+  async (eq: Request, res: Response, next: NextFunction) => {
+    const result = await UserService.getSystemStats();
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "System statistics retrieved",
+      data: result,
+    });
+  }
+);
+
 export const UserControllers = {
   createUser,
   getAllUsers,
   getSingleUser,
   updateUser,
+  blockUnblockUser,
+  getAllDrivers,
+  approveDriver,
+  getAllRides,
+  getSystemStats,
 };

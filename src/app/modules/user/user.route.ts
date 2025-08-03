@@ -16,13 +16,31 @@ router.post(
 
 router.get(
   "/all-users",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  checkAuth(Role.admin, Role.super_admin),
   UserControllers.getAllUsers
 );
 
 router.get(
-  "/:id",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  "/drivers",
+  checkAuth(Role.admin, Role.super_admin),
+  UserControllers.getAllDrivers
+);
+
+router.get(
+  "/rides",
+  checkAuth(Role.admin, Role.super_admin),
+  UserControllers.getAllRides
+);
+
+router.get(
+  "/stats",
+  checkAuth(Role.admin, Role.super_admin),
+  UserControllers.getSystemStats
+);
+
+router.get(
+  "/profile",
+  checkAuth(...Object.values(Role)),
   UserControllers.getSingleUser
 );
 
@@ -31,6 +49,18 @@ router.patch(
   validateRequest(updateUserZodSchema),
   checkAuth(...Object.values(Role)),
   UserControllers.updateUser
+);
+
+router.patch(
+  "/:userId/status",
+  checkAuth(Role.super_admin, Role.admin),
+  UserControllers.blockUnblockUser
+);
+
+router.patch(
+  "/:driverId/approve",
+  checkAuth(Role.super_admin, Role.admin),
+  UserControllers.approveDriver
 );
 
 export const UserRoutes = router;

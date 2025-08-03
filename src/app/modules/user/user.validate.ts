@@ -1,5 +1,5 @@
 import z from "zod";
-import { IsActive, Role } from "./user.interface";
+import { IStatus, Role } from "./user.interface";
 
 const authProviderSchema = z.object({
   provider: z.enum(["google", "credentials"], {
@@ -57,7 +57,7 @@ export const createUserZodSchema = z.object({
     .array(authProviderSchema)
     .min(1, { message: "At least one auth provider is required" })
     .optional(),
-  isActive: z.enum(Object.values(IsActive) as [string]).optional(),
+  IStatus: z.enum(Object.values(IStatus) as [string]).optional(),
   isVerified: z.boolean({ message: "isVerified must be a boolean" }).optional(),
   isApproved: z.boolean({ message: "isApproved must be a boolean" }).optional(),
   isAvailable: z
@@ -123,7 +123,7 @@ export const updateUserZodSchema = z.object({
     .array(authProviderSchema)
     .min(1, { message: "At least one auth provider is required" })
     .optional(),
-  isActive: z.enum(Object.values(IsActive) as [string]).optional(),
+  IStatus: z.enum(Object.values(IStatus) as [string]).optional(),
   isApproved: z.boolean({ message: "isApproved must be a boolean" }).optional(),
   isAvailable: z
     .boolean({ message: "isAvailable must be a boolean" })
