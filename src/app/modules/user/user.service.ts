@@ -100,12 +100,18 @@ const updateUser = async (
 };
 
 const blockUnblockUser = async (userId: string, status: IStatus) => {
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { status },
-    { new: true }
-  ).select("-password");
+  const user = await User.findByIdAndUpdate(userId, status, {
+    new: true,
+  }).select("-password");
   return user;
+};
+const deleteUser = async (userId: string) => {
+  const ifUserExist = await User.findById(userId);
+
+  if (!ifUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+  await User.findByIdAndDelete(userId);
 };
 
 const getAllDrivers = async () => {
@@ -164,4 +170,5 @@ export const UserService = {
   approveDriver,
   getAllRides,
   getSystemStats,
+  deleteUser,
 };

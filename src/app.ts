@@ -9,31 +9,39 @@ import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import { router } from "./app/routes";
 
-const app = express()
+const app = express();
 
+const corsOptions = {
+  origin: "http://localhost:5173", // Replace with your frontend origin
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // Allow cookies to be sent with cross-origin requests
+  optionsSuccessStatus: 204, // Some legacy browsers (IE11, various SmartTVs) choke on 200
+};
 
-app.use(expressSession({
+app.use(
+  expressSession({
     secret: envVars.EXPRESS_SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
-}))
-app.use(passport.initialize())
-app.use(passport.session())
-app.use(cookieParser())
-app.use(express.json())
-app.use(cors())
+    saveUninitialized: false,
+  })
+);
 
-app.use("/api/v1", router)
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(cookieParser());
+app.use(express.json());
+app.use(cors(corsOptions));
+
+app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
-    res.status(200).json({
-        message: "Welcome to Ride Booking App Backend"
-    })
-})
+  res.status(200).json({
+    message: "Welcome to Ride Booking App Backend",
+  });
+});
 
+app.use(globalErrorHandler);
 
-app.use(globalErrorHandler)
+app.use(notFound);
 
-app.use(notFound)
-
-export default app
+export default app;

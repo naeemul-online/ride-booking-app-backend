@@ -2,21 +2,53 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
-import { catchAsync } from "../../utils/catchAsync";
-import { sendResponse } from "../../utils/sendResponse";
-import { UserService } from "./user.service";
+import passport from "passport";
 import { envVars } from "../../config/env";
+import AppError from "../../errorHelpers/AppError";
+import { catchAsync } from "../../utils/catchAsync";
 import { verifyToken } from "../../utils/jwt";
+import { sendResponse } from "../../utils/sendResponse";
+import { setAuthCookie } from "../../utils/setCookie";
+import { createUserTokens } from "../../utils/userToken";
+import { UserService } from "./user.service";
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await UserService.createUser(req.body);
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.CREATED,
-      message: "User Created Successfully",
-      data: user,
-    });
+
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      if (err) {
+        return next(new AppError(401, err));
+      }
+
+      if (!user) {
+        return next(new AppError(401, info.message));
+      }
+
+      const userTokens = await createUserTokens(user);
+
+      const { password: pass, ...rest } = user.toObject();
+
+      setAuthCookie(res, userTokens);
+
+      sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User Logged in  Successfully",
+        data: {
+          accessToken: userTokens.accessToken,
+          refreshToken: userTokens.refreshToken,
+          data: rest,
+        },
+      });
+    })(req, res, next);
+
+    // sendResponse(res, {
+    //   success: true,
+    //   statusCode: httpStatus.CREATED,
+    //   message: "User Created Successfully",
+    //   data: user,
+    // });
   }
 );
 
@@ -39,13 +71,25 @@ const getAllUsers = catchAsync(
 const blockUnblockUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
-    const { status } = req.body;
+    const status = req.body;
     const result = await UserService.blockUnblockUser(userId, status);
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: `User ${status} successfully`,
-      data: result,
+      message: `User updated successfully`,
+      data: null,
+    });
+  }
+);
+const deleteUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    const result = await UserService.deleteUser(userId);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `User deleted successfully`,
+      data: null,
     });
   }
 );
@@ -66,7 +110,7 @@ const approveDriver = catchAsync(
 
 const getSingleUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -86,6 +130,7 @@ const updateUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.id;
     const payload = req.body;
+
     const requester = req.user as JwtPayload;
 
     const user = await UserService.updateUser(userId, payload, requester);
@@ -144,4 +189,5 @@ export const UserControllers = {
   approveDriver,
   getAllRides,
   getSystemStats,
+  deleteUser,
 };

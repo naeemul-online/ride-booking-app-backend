@@ -46,6 +46,10 @@ const getDriverRides = async (userId: string) => {
     .sort({ createdAt: -1 });
   return rides;
 };
+const getDriverInfo = async (userId: string) => {
+  const driver = await Driver.find({ userId: userId });
+  return driver;
+};
 
 const getDriverEarnings = async (userId: string) => {
   const driver = await Driver.findOne({ userId }).populate(
@@ -84,4 +88,5 @@ export const DriverService = {
   getDriverEarnings,
   updateLocation,
   getDriverRides,
+  getDriverInfo,
 };

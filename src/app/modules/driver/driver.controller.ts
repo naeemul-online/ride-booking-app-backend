@@ -11,7 +11,7 @@ import { DriverService } from "./driver.service";
 const registerDriver = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -21,7 +21,7 @@ const registerDriver = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
-      message: "driver Created Successfully",
+      message: "Vehicle registered Successfully",
       data: user,
     });
   }
@@ -30,7 +30,7 @@ const registerDriver = catchAsync(
 const updateDriverStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { isOnline } = req.body;
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -66,7 +66,7 @@ const getDriverRides = catchAsync(
 
 const getEarnings = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -77,6 +77,23 @@ const getEarnings = catchAsync(
       statusCode: 200,
       success: true,
       message: "Earnings retrieved successfully",
+      data: result,
+    });
+  }
+);
+const getDriverInfo = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization || req.cookies.accessToken;
+    const { userId } = verifyToken(
+      token,
+      envVars.JWT_ACCESS_SECRET
+    ) as JwtPayload;
+
+    const result = await DriverService.getDriverInfo(userId);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Driver info retrieved successfully",
       data: result,
     });
   }
@@ -108,4 +125,5 @@ export const DriverController = {
   getEarnings,
   updateLocation,
   getDriverRides,
+  getDriverInfo,
 };
