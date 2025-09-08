@@ -16,5 +16,6 @@ router.get("/stats", (0, checkAuth_1.checkAuth)(user_interface_1.Role.admin, use
 router.get("/profile", (0, checkAuth_1.checkAuth)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.getSingleUser);
 router.patch("/:id", (0, validateRequest_1.validateRequest)(user_validate_1.updateUserZodSchema), (0, checkAuth_1.checkAuth)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.updateUser);
 router.patch("/:userId/status", (0, checkAuth_1.checkAuth)(user_interface_1.Role.super_admin, user_interface_1.Role.admin), user_controller_1.UserControllers.blockUnblockUser);
+router.delete("/:userId/delete", (0, checkAuth_1.checkAuth)(user_interface_1.Role.super_admin, user_interface_1.Role.admin), user_controller_1.UserControllers.deleteUser);
 router.patch("/:driverId/approve", (0, checkAuth_1.checkAuth)(user_interface_1.Role.super_admin, user_interface_1.Role.admin), user_controller_1.UserControllers.approveDriver);
 exports.UserRoutes = router;

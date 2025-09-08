@@ -16,7 +16,7 @@ const jwt_1 = require("../../utils/jwt");
 const sendResponse_1 = require("../../utils/sendResponse");
 const ride_service_1 = require("./ride.service");
 const requestRide = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const result = yield ride_service_1.RideService.requestRide(userId, req.body);
     (0, sendResponse_1.sendResponse)(res, {
@@ -35,9 +35,20 @@ const getAvailableRides = (0, catchAsync_1.catchAsync)((req, res, next) => __awa
         data: result,
     });
 }));
+/* Single ride */
+const getSingleRide = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const result = yield ride_service_1.RideService.getSingleRide(id);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Single ride retrieved",
+        data: result,
+    });
+}));
 const acceptRide = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { rideId } = req.params;
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const result = yield ride_service_1.RideService.acceptRide(rideId, userId);
     (0, sendResponse_1.sendResponse)(res, {
@@ -50,7 +61,7 @@ const acceptRide = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(vo
 const updateRideStatus = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { rideId } = req.params;
     const { status } = req.body;
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const decodedToken = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const userId = decodedToken.userId;
     const result = yield ride_service_1.RideService.updateRideStatus(rideId, userId, status);
@@ -61,8 +72,18 @@ const updateRideStatus = (0, catchAsync_1.catchAsync)((req, res, next) => __awai
         data: result,
     });
 }));
+const getCurrentRide = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield ride_service_1.RideService.getCurrentRide(id);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Ride retrieved successfully",
+        data: result,
+    });
+}));
 const getRideHistory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId, role } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const result = yield ride_service_1.RideService.getRideHistory(userId, role);
     (0, sendResponse_1.sendResponse)(res, {
@@ -75,7 +96,7 @@ const getRideHistory = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
 const cancelRide = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { rideId } = req.params;
     const { reason } = req.body;
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const result = yield ride_service_1.RideService.cancelRide(rideId, userId, reason);
     (0, sendResponse_1.sendResponse)(res, {
@@ -90,6 +111,8 @@ exports.RideController = {
     getAvailableRides,
     acceptRide,
     updateRideStatus,
+    getCurrentRide,
     getRideHistory,
     cancelRide,
+    getSingleRide,
 };

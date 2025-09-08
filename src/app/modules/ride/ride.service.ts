@@ -34,6 +34,11 @@ const getAvailableRides = async () => {
   return rides;
 };
 
+const getSingleRide = async (id: string) => {
+  const rides = await Ride.findById(id).populate("riderId", "name phone");
+  return rides;
+};
+
 const acceptRide = async (rideId: string, driverId: string) => {
   // Check if driver is approved and online
   const driver = await Driver.findOne({
@@ -95,11 +100,18 @@ const updateRideStatus = async (
   return ride;
 };
 
+const getCurrentRide = async (rideId: string) => {
+  const rides = await Ride.findById(rideId);
+  return rides;
+};
+
 const getRideHistory = async (userId: string, role: string) => {
   const query = role === "driver" ? { driverId: userId } : { riderId: userId };
+
   const rides = await Ride.find(query)
     .populate("riderId driverId", "name phone")
     .sort({ createdAt: -1 });
+
   return rides;
 };
 
@@ -131,5 +143,7 @@ export const RideService = {
   acceptRide,
   updateRideStatus,
   getRideHistory,
+  getCurrentRide,
   cancelRide,
+  getSingleRide,
 };

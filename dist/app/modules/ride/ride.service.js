@@ -31,6 +31,10 @@ const getAvailableRides = () => __awaiter(void 0, void 0, void 0, function* () {
         .sort({ requestedAt: -1 });
     return rides;
 });
+const getSingleRide = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const rides = yield ride_model_1.Ride.findById(id).populate("riderId", "name phone");
+    return rides;
+});
 const acceptRide = (rideId, driverId) => __awaiter(void 0, void 0, void 0, function* () {
     // Check if driver is approved and online
     const driver = yield driver_model_1.Driver.findOne({
@@ -70,6 +74,10 @@ const updateRideStatus = (rideId, driverId, status) => __awaiter(void 0, void 0,
     }, updateData, { new: true }).populate("riderId driverId", "name phone");
     return ride;
 });
+const getCurrentRide = (rideId) => __awaiter(void 0, void 0, void 0, function* () {
+    const rides = yield ride_model_1.Ride.findById(rideId);
+    return rides;
+});
 const getRideHistory = (userId, role) => __awaiter(void 0, void 0, void 0, function* () {
     const query = role === "driver" ? { driverId: userId } : { riderId: userId };
     const rides = yield ride_model_1.Ride.find(query)
@@ -98,5 +106,7 @@ exports.RideService = {
     acceptRide,
     updateRideStatus,
     getRideHistory,
+    getCurrentRide,
     cancelRide,
+    getSingleRide,
 };

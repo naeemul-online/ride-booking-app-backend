@@ -86,8 +86,18 @@ const updateUser = (userId, payload, requester) => __awaiter(void 0, void 0, voi
     return newUpdatedUser;
 });
 const blockUnblockUser = (userId, status) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_model_1.User.findByIdAndUpdate(userId, { status }, { new: true }).select("-password");
+    const user = yield user_model_1.User.findByIdAndUpdate(userId, { status }, {
+        new: true,
+        runValidators: true,
+    }).select("-password");
     return user;
+});
+const deleteUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const ifUserExist = yield user_model_1.User.findById(userId);
+    if (!ifUserExist) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User Not Found");
+    }
+    yield user_model_1.User.findByIdAndDelete(userId);
 });
 const getAllDrivers = () => __awaiter(void 0, void 0, void 0, function* () {
     const drivers = yield driver_model_1.Driver.find({})
@@ -133,4 +143,5 @@ exports.UserService = {
     approveDriver,
     getAllRides,
     getSystemStats,
+    deleteUser,
 };

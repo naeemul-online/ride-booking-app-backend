@@ -57,6 +57,12 @@ router.patch(
   UserControllers.blockUnblockUser
 );
 
+router.delete(
+  "/:userId/delete",
+  checkAuth(Role.super_admin, Role.admin),
+  UserControllers.deleteUser
+);
+
 router.patch(
   "/:driverId/approve",
   checkAuth(Role.super_admin, Role.admin),
