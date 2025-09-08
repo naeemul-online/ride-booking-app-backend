@@ -22,19 +22,19 @@ const driver_service_1 = require("./driver.service");
 const registerDriver = (0, catchAsync_1.catchAsync)(
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const user = yield driver_service_1.DriverService.registerDriver(userId, req.body);
     (0, sendResponse_1.sendResponse)(res, {
         success: true,
         statusCode: http_status_codes_1.default.CREATED,
-        message: "driver Created Successfully",
+        message: "Vehicle registered Successfully",
         data: user,
     });
 }));
 const updateDriverStatus = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { isOnline } = req.body;
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const result = yield driver_service_1.DriverService.updateDriverStatus(userId, isOnline);
     (0, sendResponse_1.sendResponse)(res, {
@@ -56,7 +56,7 @@ const getDriverRides = (0, catchAsync_1.catchAsync)((req, res, next) => __awaite
     });
 }));
 const getEarnings = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const result = yield driver_service_1.DriverService.getDriverEarnings(userId);
     (0, sendResponse_1.sendResponse)(res, {
@@ -66,8 +66,19 @@ const getEarnings = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(v
         data: result,
     });
 }));
+const getDriverInfo = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.headers.authorization || req.cookies.accessToken;
+    const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
+    const result = yield driver_service_1.DriverService.getDriverInfo(userId);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Driver info retrieved successfully",
+        data: result,
+    });
+}));
 const updateLocation = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = (0, jwt_1.verifyToken)(token, env_1.envVars.JWT_ACCESS_SECRET);
     const result = yield driver_service_1.DriverService.updateLocation(userId, req.body.location);
     (0, sendResponse_1.sendResponse)(res, {
@@ -83,4 +94,5 @@ exports.DriverController = {
     getEarnings,
     updateLocation,
     getDriverRides,
+    getDriverInfo,
 };

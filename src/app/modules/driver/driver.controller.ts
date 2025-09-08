@@ -101,7 +101,7 @@ const getDriverInfo = catchAsync(
 
 const updateLocation = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET

@@ -42,6 +42,10 @@ const getDriverRides = (userId) => __awaiter(void 0, void 0, void 0, function* (
         .sort({ createdAt: -1 });
     return rides;
 });
+const getDriverInfo = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const driver = yield driver_model_1.Driver.find({ userId: userId });
+    return driver;
+});
 const getDriverEarnings = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const driver = yield driver_model_1.Driver.findOne({ userId }).populate("userId", "name email");
@@ -75,4 +79,5 @@ exports.DriverService = {
     getDriverEarnings,
     updateLocation,
     getDriverRides,
+    getDriverInfo,
 };

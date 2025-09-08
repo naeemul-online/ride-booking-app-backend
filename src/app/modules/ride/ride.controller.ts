@@ -9,13 +9,14 @@ import { RideService } from "./ride.service";
 
 const requestRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
     ) as JwtPayload;
 
     const result = await RideService.requestRide(userId, req.body);
+
     sendResponse(res, {
       statusCode: 201,
       success: true,
@@ -37,11 +38,26 @@ const getAvailableRides = catchAsync(
   }
 );
 
+/* Single ride */
+const getSingleRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+
+    const result = await RideService.getSingleRide(id);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Single ride retrieved",
+      data: result,
+    });
+  }
+);
+
 const acceptRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { rideId } = req.params;
 
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -62,7 +78,7 @@ const updateRideStatus = catchAsync(
     const { rideId } = req.params;
     const { status } = req.body;
 
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const decodedToken = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -80,9 +96,22 @@ const updateRideStatus = catchAsync(
   }
 );
 
+const getCurrentRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    const result = await RideService.getCurrentRide(id);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Ride retrieved successfully",
+      data: result,
+    });
+  }
+);
 const getRideHistory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization as string;
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId, role } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -102,8 +131,8 @@ const cancelRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { rideId } = req.params;
     const { reason } = req.body;
-    
-    const token = req.headers.authorization as string;
+
+    const token = req.headers.authorization || req.cookies.accessToken;
     const { userId } = verifyToken(
       token,
       envVars.JWT_ACCESS_SECRET
@@ -124,6 +153,8 @@ export const RideController = {
   getAvailableRides,
   acceptRide,
   updateRideStatus,
+  getCurrentRide,
   getRideHistory,
   cancelRide,
+  getSingleRide,
 };

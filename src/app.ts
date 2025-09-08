@@ -12,25 +12,28 @@ import { router } from "./app/routes";
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:5173", // Replace with your frontend origin
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // Allow cookies to be sent with cross-origin requests
-  optionsSuccessStatus: 204, // Some legacy browsers (IE11, various SmartTVs) choke on 200
+  origin: ["http://localhost:5173", "https://ride-sharing-frontend.vercel.app"],
+  credentials: true,
 };
+
+app.use(cors(corsOptions));
+app.use(cookieParser());
+app.use(express.json());
 
 app.use(
   expressSession({
     secret: envVars.EXPRESS_SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: true,
+      sameSite: "none",
+    },
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(cookieParser());
-app.use(express.json());
-app.use(cors(corsOptions));
 
 app.use("/api/v1", router);
 

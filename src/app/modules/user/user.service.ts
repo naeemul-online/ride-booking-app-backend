@@ -100,9 +100,14 @@ const updateUser = async (
 };
 
 const blockUnblockUser = async (userId: string, status: IStatus) => {
-  const user = await User.findByIdAndUpdate(userId, status, {
-    new: true,
-  }).select("-password");
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { status },
+    {
+      new: true,
+      runValidators: true,
+    }
+  ).select("-password");
   return user;
 };
 const deleteUser = async (userId: string) => {
@@ -142,6 +147,7 @@ const getAllRides = async () => {
 
   return { totalRides, rides };
 };
+
 const getSystemStats = async () => {
   const totalUsers = await User.countDocuments();
   const totalDrivers = await Driver.countDocuments();

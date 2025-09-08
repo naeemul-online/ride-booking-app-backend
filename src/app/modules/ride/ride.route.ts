@@ -9,14 +9,26 @@ router.post("/request", checkAuth(Role.rider), RideController.requestRide);
 
 router.get(
   "/available",
-  checkAuth(Role.driver),
+  checkAuth(...Object.values(Role)),
   RideController.getAvailableRides
+);
+
+router.get(
+  "/:id/current-ride",
+  checkAuth(Role.rider),
+  RideController.getCurrentRide
 );
 
 router.get(
   "/history",
   checkAuth(...Object.values(Role)),
   RideController.getRideHistory
+);
+
+router.get(
+  "/:id",
+  checkAuth(...Object.values(Role)),
+  RideController.getSingleRide
 );
 
 router.patch(
@@ -36,6 +48,5 @@ router.patch(
   checkAuth(...Object.values(Role)),
   RideController.cancelRide
 );
-
 
 export const RideRouts = router;

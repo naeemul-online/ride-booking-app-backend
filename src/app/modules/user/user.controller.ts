@@ -71,13 +71,13 @@ const getAllUsers = catchAsync(
 const blockUnblockUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
-    const status = req.body;
+    const { status } = req.body;
     const result = await UserService.blockUnblockUser(userId, status);
     sendResponse(res, {
       statusCode: 200,
       success: true,
       message: `User updated successfully`,
-      data: null,
+      data: result,
     });
   }
 );
@@ -98,6 +98,7 @@ const approveDriver = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { driverId } = req.params;
     const { approvalStatus } = req.body;
+    console.log(driverId, approvalStatus);
     const result = await UserService.approveDriver(driverId, approvalStatus);
     sendResponse(res, {
       statusCode: 200,
